@@ -585,13 +585,13 @@ His performances have taken him to Supermarket Club, Club Bellevue, and the Terr
       pauseAuto();
       pos -= cardStep();
       if (pos < 0) pos += loopWidth;
-      setsTrack.scrollLeft = pos;
+      setsTrack.scrollTo({ left: pos, behavior: 'smooth' });
     });
     document.querySelector('.sets-arrow.next').addEventListener('click', () => {
       pauseAuto();
       pos += cardStep();
       if (pos >= loopWidth) pos -= loopWidth;
-      setsTrack.scrollLeft = pos;
+      setsTrack.scrollTo({ left: pos, behavior: 'smooth' });
     });
   })();
 
