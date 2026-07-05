@@ -581,17 +581,39 @@ His performances have taken him to Supermarket Club, Club Bellevue, and the Terr
     setsTrack.addEventListener('wheel', pauseAuto, { passive:true });
 
     const cardStep = () => (setsTrack.querySelector('.set-card')?.offsetWidth || 300) + 18;
+
+    // Nach dem Smooth-Scroll wird die Position bei Bedarf unsichtbar auf die
+    // erste Kopie der Liste zurückgesetzt (die Liste ist dupliziert, daher
+    // sieht der Sprung identisch zur aktuellen Stelle aus).
+    let snapTimer = null;
+    const scheduleSnap = () => {
+      clearTimeout(snapTimer);
+      snapTimer = setTimeout(() => {
+        if (pos >= loopWidth) pos -= loopWidth;
+        else if (pos < 0) pos += loopWidth;
+        setsTrack.scrollLeft = pos;
+      }, 500);
+    };
+
     document.querySelector('.sets-arrow.prev').addEventListener('click', () => {
       pauseAuto();
-      pos -= cardStep();
-      if (pos < 0) pos += loopWidth;
+      let target = pos - cardStep();
+      if (target < 0) {
+        // Vor dem Zurückscrollen unsichtbar in die zweite Kopie springen,
+        // damit dahinter noch Platz zum Scrollen ist.
+        pos += loopWidth;
+        setsTrack.scrollLeft = pos;
+        target = pos - cardStep();
+      }
+      pos = target;
       setsTrack.scrollTo({ left: pos, behavior: 'smooth' });
+      scheduleSnap();
     });
     document.querySelector('.sets-arrow.next').addEventListener('click', () => {
       pauseAuto();
       pos += cardStep();
-      if (pos >= loopWidth) pos -= loopWidth;
       setsTrack.scrollTo({ left: pos, behavior: 'smooth' });
+      scheduleSnap();
     });
   })();
 
