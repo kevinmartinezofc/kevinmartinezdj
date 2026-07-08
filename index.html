@@ -273,6 +273,12 @@
     text-transform:uppercase; color:var(--text-dim);
   }
   .timeline-content .meta .next-tag{ color:var(--accent); font-weight:700; }
+  .timeline-content .ticket-link{
+    display:inline-block; margin-top:10px; font-family:'Space Mono', monospace; font-size:11px;
+    letter-spacing:0.1em; text-transform:uppercase; color:var(--accent); text-decoration:none;
+    border-bottom:1px solid var(--accent); padding-bottom:2px; transition:opacity 0.2s;
+  }
+  .timeline-content .ticket-link:hover{ opacity:0.7; }
 
   /* ===== Residency board (past gigs) — signature element ===== */
   .board{ border-top:1px solid var(--line); }
@@ -355,7 +361,7 @@
   <div class="hero-bg"></div>
   <div class="hero-overlay"></div>
   <div class="hero-content">
-    <span class="eyebrow">Tech-House · Afro Tech</span>
+    <span class="eyebrow">House · Afro Tech</span>
     <h1>KEV<span class="colon">:</span>N<br>MARTINEZ</h1>
     <div class="sub">Zurich <span>—</span> Available for Bookings Worldwide</div>
   </div>
@@ -490,7 +496,7 @@ His performances have taken him to Supermarket Club, Club Bellevue, and the Terr
   // "NEXT UP"-Marker). date-Format: "JUL 11" (Monat + Tag).
   // ============================================================
   const UPCOMING_LIST = [
-    { date:"JUL 25", venue:"Bügelbrett x Tamarindo Art @ Kraftwerk",        city:"Zürich, CH", tag:"Maintime" },
+    { date:"JUL 25", venue:"Bügelbrett x Tamarindo Art @ Kraftwerk",        city:"Zürich, CH", tag:"Maintime", ticket:"https://eventfrog.ch/en/p/festivals/electronic/open-air-daydance-kraftwerk-zurich-7475659283088028458.html" },
   ];
 
   // ============================================================
@@ -626,6 +632,7 @@ His performances have taken him to Supermarket Club, Club Bellevue, and the Terr
       <div class="timeline-content">
         <h3>${g.venue}</h3>
         <div class="meta">${g.city} — ${g.tag}${i === 0 ? ' · <span class="next-tag">NEXT UP</span>' : ''}</div>
+        ${g.ticket ? `<a class="ticket-link" href="${g.ticket}" target="_blank" rel="noopener">Tickets →</a>` : ''}
       </div>
     </div>
   `).join('');
