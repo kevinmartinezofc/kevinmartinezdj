@@ -5,3 +5,5 @@ __pycache__/
 .env
 .pytest_cache/
 instance/
+
+app/static/files/photos.zip
