@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="plain-page">
+  <h1>Login</h1>
+  <form method="POST">
+    <div class="field">
+      <label>Benutzername</label>
+      <input type="text" name="username" required autofocus>
+    </div>
+    <div class="field">
+      <label>Passwort</label>
+      <input type="password" name="password" required>
+    </div>
+    <button class="submit-btn" type="submit">Einloggen</button>
+  </form>
+  <p class="auth-switch">Noch kein Konto? <a href="{{ url_for('auth.register') }}">Jetzt registrieren</a></p>
+</section>
+{% endblock %}

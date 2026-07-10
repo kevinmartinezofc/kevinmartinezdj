@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="plain-page">
+  <h1>Admin Dashboard</h1>
+
+  <div class="admin-section">
+    <h2>Dein API-Token</h2>
+    <div class="api-token-box">
+      {% if current_user.api_token %}
+        {{ current_user.api_token }}
+        <br><br>
+        Beispiel: curl -H "Authorization: Bearer {{ current_user.api_token }}" {{ request.host_url }}api/bookings
+      {% else %}
+        Kein Token vorhanden (nur der erste registrierte Admin erhaelt automatisch einen).
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="admin-section">
+    <h2>Booking-Anfragen</h2>
+    <table class="admin-table">
+      <thead>
+        <tr><th>Datum</th><th>Name</th><th>E-Mail</th><th>Ort</th><th>Nachricht</th><th>Status</th><th>Aktion</th></tr>
+      </thead>
+      <tbody>
+        {% for b in bookings %}
+        <tr>
+          <td>{{ b.event_date }}</td>
+          <td>{{ b.requester_name }}</td>
+          <td>{{ b.requester_email }}</td>
+          <td>{{ b.location }}</td>
+          <td>{{ b.message }}</td>
+          <td><span class="badge {{ b.status }}">{{ b.status }}</span></td>
+          <td>
+            {% if b.status == 'pending' %}
+            <form style="display:inline; margin:0;" method="POST" action="{{ url_for('booking.accept_booking', booking_id=b.id) }}">
+              <button class="btn-small accept" type="submit">Annehmen</button>
+            </form>
+            <form style="display:inline; margin:0;" method="POST" action="{{ url_for('booking.decline_booking', booking_id=b.id) }}">
+              <button class="btn-small decline" type="submit">Ablehnen</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7">Keine Anfragen vorhanden.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="admin-section">
+    <h2>Gigs verwalten</h2>
+    <form class="inline-form" method="POST" action="{{ url_for('booking.add_gig') }}">
+      <div class="field"><label>Venue</label><input type="text" name="venue" required></div>
+      <div class="field"><label>Stadt</label><input type="text" name="city" required></div>
+      <div class="field"><label>Tag</label><input type="text" name="tag" placeholder="z.B. Opening Set"></div>
+      <div class="field"><label>Datum</label><input type="date" name="event_date" required></div>
+      <button class="submit-btn" type="submit">Hinzufuegen</button>
+    </form>
+    <table class="admin-table">
+      <thead><tr><th>Datum</th><th>Venue</th><th>Stadt</th><th>Tag</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        {% for g in gigs %}
+        <tr>
+          <td>{{ g.event_date }}</td>
+          <td>{{ g.venue }}</td>
+          <td>{{ g.city }}</td>
+          <td>{{ g.tag }}</td>
+          <td>{{ g.status }}</td>
+          <td>
+            <form style="margin:0;" method="POST" action="{{ url_for('booking.delete_gig', gig_id=g.id) }}">
+              <button class="btn-small decline" type="submit">Loeschen</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="admin-section">
+    <h2>Live Sets verwalten</h2>
+    <form class="inline-form" method="POST" action="{{ url_for('booking.add_set') }}">
+      <div class="field"><label>Titel</label><input type="text" name="title" required></div>
+      <div class="field">
+        <label>Plattform</label>
+        <select name="platform">
+          <option value="youtube">YouTube</option>
+          <option value="soundcloud">SoundCloud</option>
+        </select>
+      </div>
+      <div class="field"><label>Video-ID</label><input type="text" name="video_id" placeholder="nur YouTube"></div>
+      <div class="field"><label>Thumbnail-URL</label><input type="text" name="thumb_url" placeholder="nur SoundCloud"></div>
+      <div class="field"><label>Link</label><input type="text" name="external_url" required></div>
+      <button class="submit-btn" type="submit">Hinzufuegen</button>
+    </form>
+    <table class="admin-table">
+      <thead><tr><th>Titel</th><th>Plattform</th><th></th></tr></thead>
+      <tbody>
+        {% for s in sets %}
+        <tr>
+          <td>{{ s.title }}</td>
+          <td>{{ s.platform }}</td>
+          <td>
+            <form style="margin:0;" method="POST" action="{{ url_for('booking.delete_set', set_id=s.id) }}">
+              <button class="btn-small decline" type="submit">Loeschen</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</section>
+{% endblock %}

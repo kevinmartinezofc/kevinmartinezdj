@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}KEV:N MARTINEZ — Tech-House / Afro Tech{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="{{ url_for('main.index') }}">KEV:N MARTINEZ</a>
+  <ul class="nav-links">
+    <li><a href="{{ url_for('main.index') }}#about">About</a></li>
+    <li><a href="{{ url_for('main.index') }}#gigs">Gigs</a></li>
+    <li><a href="{{ url_for('main.index') }}#booking">Booking</a></li>
+    <li><a href="{{ url_for('main.index') }}#press">Press Kit</a></li>
+    {% if current_user.is_authenticated %}
+      {% if current_user.is_admin %}<li><a href="{{ url_for('booking.dashboard') }}">Admin</a></li>{% endif %}
+      <li><a href="{{ url_for('auth.logout') }}">Logout ({{ current_user.username }})</a></li>
+    {% else %}
+      <li><a href="{{ url_for('auth.login') }}">Login</a></li>
+      <li><a href="{{ url_for('auth.register') }}">Register</a></li>
+    {% endif %}
+  </ul>
+</nav>
+
+<div class="flash-wrap">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="flash {{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+</div>
+
+{% block content %}{% endblock %}
+
+<footer>
+  <div class="flogo">KEV:N MARTINEZ</div>
+  <div class="socials">
+    <a href="#">Instagram</a>
+    <a href="#">SoundCloud</a>
+    <a href="#">Tik Tok</a>
+    <a href="#">Spotify</a>
+    <a href="#">Linktree</a>
+  </div>
+</footer>
+
+</body>
+</html>

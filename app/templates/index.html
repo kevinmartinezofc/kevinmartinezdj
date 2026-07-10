@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <span class="eyebrow">Tech-House · Afro Tech</span>
+    <h1>KEV<span class="colon">:</span>N<br>MARTINEZ</h1>
+    <div class="sub">Zurich <span>—</span> Available for Bookings Worldwide</div>
+  </div>
+  <div class="scroll-hint">Scroll</div>
+</section>
+
+<section id="about">
+  <div class="about reveal">
+    <div class="portrait"><img src="{{ url_for('static', filename='images/about.jpg') }}" alt="KEV:N MARTINEZ portrait"></div>
+    <div>
+      <p class="lead">Growing up between record crates and club nights.</p>
+      <p>Music was never just background noise for KEV:N MARTINEZ — it was always the main event. His father, who ran a night club, brought him along to the Street Parade and into clubs from an early age. What started as curiosity became a calling.
+      His sets are shaped by his Spanish roots: driving rhythms meet powerful melodies that slowly build into a forceful, hypnotic energy. Through it all, one thing stays constant — the connection to the crowd.
+      His performances have taken him to Supermarket Club, Club Bellevue, and the Terrazzza Festival.</p>
+    </div>
+  </div>
+</section>
+
+<section id="gallery">
+  <div class="section-head reveal">
+    <span class="num">Listen &amp; Watch</span>
+    <h2>Tracks & Live Sets</h2>
+  </div>
+  <div class="sets-wrapper reveal">
+    <div class="sets-track" id="setsTrack">
+      {% for s in sets %}
+      <a class="set-card" href="{{ s.external_url }}" target="_blank" rel="noopener">
+        <div class="set-thumb">
+          <span class="set-badge">{{ 'YouTube' if s.platform == 'youtube' else 'SoundCloud' }}</span>
+          {% set thumb = s.thumb_url or (s.video_id and 'https://img.youtube.com/vi/' ~ s.video_id ~ '/hqdefault.jpg' if s.platform == 'youtube' else none) %}
+          {% if thumb %}
+            <img src="{{ thumb }}" alt="{{ s.title }}">
+          {% else %}
+            <div class="fallback">{{ s.title }}</div>
+          {% endif %}
+          <div class="play"><span>▶</span></div>
+        </div>
+        <div class="set-info">
+          <h3>{{ s.title }}</h3>
+          <div class="meta">{{ 'YouTube' if s.platform == 'youtube' else 'SoundCloud' }}</div>
+        </div>
+      </a>
+      {% else %}
+      <p class="mono" style="color:var(--text-dim);">Noch keine Sets hinterlegt.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section id="gigs">
+  <div class="section-head reveal">
+    <span class="num">What's Next</span>
+    <h2>Upcoming Gigs</h2>
+  </div>
+  <div class="timeline reveal">
+    {% for g in upcoming %}
+    <div class="timeline-item {{ 'next-up' if loop.first else '' }}">
+      <div class="timeline-marker"></div>
+      <div class="timeline-date">{{ g.event_date.strftime('%b %d') | upper }}</div>
+      <div class="timeline-content">
+        <h3>{{ g.venue }}</h3>
+        <div class="meta">{{ g.city }} — {{ g.tag or '' }}{% if loop.first %} · <span class="next-tag">NEXT UP</span>{% endif %}</div>
+      </div>
+    </div>
+    {% else %}
+    <p class="mono" style="color:var(--text-dim);">Aktuell keine bestaetigten Gigs.</p>
+    {% endfor %}
+  </div>
+
+  <div class="section-head reveal" style="margin-top:100px;">
+    <span class="num">Residency Board</span>
+    <h2>Past Gigs</h2>
+  </div>
+  <div class="board board-scroll reveal">
+    {% for g in past %}
+    <div class="board-row">
+      <div class="date mono">{{ g.event_date.strftime('%b %Y') | upper }}</div>
+      <div class="venue">{{ g.venue }}</div>
+      <div class="city mono">{{ g.city }}</div>
+      <div class="tag">{{ g.tag or '' }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section id="booking" class="booking">
+  <div class="booking-inner">
+    <div class="section-head reveal">
+      <span class="num">Booking</span>
+      <h2>Request Booking</h2>
+    </div>
+
+    {% if current_user.is_authenticated %}
+    <form class="reveal" action="{{ url_for('booking.create_booking') }}" method="POST">
+      <div class="row2">
+        <div class="field">
+          <label>Event-Date</label>
+          <input type="date" name="event_date" required>
+        </div>
+        <div class="field">
+          <label>Location / City</label>
+          <input type="text" name="location" placeholder="z.B. Club XY, Zurich" required>
+        </div>
+      </div>
+      <div class="field">
+        <label>Message</label>
+        <textarea name="message" placeholder="Details zum Event, Set-Laenge, Publikum..."></textarea>
+      </div>
+      <button class="submit-btn" type="submit">Send Request</button>
+      <p class="form-note">Angemeldet als {{ current_user.username }} ({{ current_user.email }})</p>
+    </form>
+    {% else %}
+    <p class="form-note" style="font-size:14px;">
+      Bitte <a href="{{ url_for('auth.login') }}" style="color:var(--accent);">einloggen</a>
+      oder <a href="{{ url_for('auth.register') }}" style="color:var(--accent);">registrieren</a>,
+      um eine Booking-Anfrage zu senden.
+    </p>
+    {% endif %}
+  </div>
+</section>
+
+<section id="press">
+  <div class="section-head reveal">
+    <span class="num">Electronic Press Kit</span>
+    <h2>For Bookers & Event Organizer</h2>
+  </div>
+  <div class="press-grid reveal">
+    {% for p in press_items %}
+    <a class="press-item" href="{{ p.file_url }}" target="_blank" rel="noopener">
+      <span class="mono">{{ p.type | upper }}</span>
+      <h3>{{ p.title }}</h3>
+      <span class="dl">{{ 'Open' if p.type == 'link' else 'Download' }}</span>
+    </a>
+    {% else %}
+    <p class="mono" style="color:var(--text-dim); padding:20px;">Noch keine Presskit-Dateien hinterlegt.</p>
+    {% endfor %}
+  </div>
+</section>
+
+{% endblock %}
