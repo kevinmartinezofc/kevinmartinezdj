@@ -68,8 +68,8 @@ nav ul li a:hover{color:var(--accent);}
 }
 .eyebrow{
   font-family:'Space Mono', monospace;
-  font-size:11px; letter-spacing:0.35em; text-transform:uppercase;
-  color:var(--accent); margin-bottom:22px;
+  font-size:14px; font-weight:700; letter-spacing:0.35em; text-transform:uppercase;
+  color:var(--accent-bright); margin-bottom:22px;
 }
 .hero h1{
   font-family:'Unbounded', sans-serif;
@@ -323,4 +323,7 @@ footer{
 footer .flogo{ font-family:'Unbounded', sans-serif; font-weight:700; font-size:15px; color:var(--accent-bright); text-transform:none; letter-spacing:0.04em; }
 footer .socials{ display:flex; gap:24px; }
 footer .socials a:hover{ color:var(--accent); }
+footer .footer-admin{ font-size:9px; opacity:0.45; letter-spacing:0.08em; transition:opacity .3s; }
+footer .footer-admin:hover{ opacity:0.9; }
+footer .footer-admin a:hover{ color:var(--accent); }
 @media(max-width:600px){ footer{ flex-direction:column; gap:20px; text-align:center; } }
