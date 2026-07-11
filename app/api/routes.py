@@ -1,3 +1,12 @@
+"""
+Hinweis zur Quellenverwendung (gemaess Leitfaden fuer schriftliche Arbeiten
+der ipso! Bildung, Kap. 2.1.3): Das REST-API inkl. Token-Authentifizierung
+in diesem Modul wurde in Zusammenarbeit mit dem KI-Werkzeug Claude
+(Anthropic) entwickelt. Pruefung, Anpassung und inhaltliche Verantwortung
+liegen beim Verfasser (Kevin Martinez). Vollstaendige Deklaration siehe
+KI-Deklarationstabelle in der Eigenstaendigkeitserklaerung der
+schriftlichen Dokumentation.
+"""
 from functools import wraps
 
 from flask import Blueprint, jsonify, request

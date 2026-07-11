@@ -1,3 +1,13 @@
+"""
+Hinweis zur Quellenverwendung (gemaess Leitfaden fuer schriftliche Arbeiten
+der ipso! Bildung, Kap. 2.1.3): Die Geschaeftslogik in diesem Modul
+(insbesondere die Konfliktpruefung bei Gig-Terminen und die automatische
+Gig-Erstellung bei Booking-Annahme) wurde in Zusammenarbeit mit dem
+KI-Werkzeug Claude (Anthropic) entwickelt. Pruefung, Anpassung und
+inhaltliche Verantwortung liegen beim Verfasser (Kevin Martinez).
+Vollstaendige Deklaration siehe KI-Deklarationstabelle in der
+Eigenstaendigkeitserklaerung der schriftlichen Dokumentation.
+"""
 from datetime import datetime
 from functools import wraps
 
