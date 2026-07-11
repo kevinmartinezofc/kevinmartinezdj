@@ -66,7 +66,7 @@ SETS_LIST = [
 
 PRESS_ITEMS = [
     {"type": "pdf", "title": "Biografie", "file_url": "/static/files/KEVN_MARTINEZ_Presskit.pdf"},
-    {"type": "link", "title": "Full EPK",
+    {"type": "link", "title": "Full EPK", "gated": True,
      "file_url": "https://drive.google.com/drive/folders/1b5oLOned5Zqsk5WAZ9N0EfkkB3RFWRX1?usp=sharing"},
 ]
 

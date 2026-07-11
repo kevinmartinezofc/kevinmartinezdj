@@ -14,7 +14,7 @@ os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 
 from app import create_app
 from app.extensions import db
-from app.models import User, Gig
+from app.models import User, Gig, PressItem
 
 
 @pytest.fixture
@@ -82,20 +82,10 @@ def test_login_success(client):
     assert b"Willkommen" in resp.data
 
 
-def test_booking_requires_login(client):
+def test_anonymous_can_submit_booking(client):
+    """Booking-Formular ist bewusst oeffentlich (kein Login noetig) - Marketing-Entscheidung."""
     resp = client.post("/booking/request", data={
-        "event_date": (date.today() + timedelta(days=10)).isoformat(),
-        "location": "Test Club",
-        "message": "Test",
-    }, follow_redirects=True)
-    # redirect zu login, da @login_required
-    assert b"Login" in resp.data or resp.status_code == 200
-
-
-def test_logged_in_user_can_submit_booking(client, app):
-    register(client)
-    login(client)
-    resp = client.post("/booking/request", data={
+        "name": "Club Booker", "email": "booker@example.com",
         "event_date": (date.today() + timedelta(days=10)).isoformat(),
         "location": "Test Club",
         "message": "Test Anfrage",
@@ -103,10 +93,19 @@ def test_logged_in_user_can_submit_booking(client, app):
     assert b"versendet" in resp.data
 
 
-def test_booking_rejects_past_date(client):
-    register(client)
-    login(client)
+def test_booking_rejects_missing_name_or_email(client):
     resp = client.post("/booking/request", data={
+        "name": "", "email": "",
+        "event_date": (date.today() + timedelta(days=10)).isoformat(),
+        "location": "Test Club",
+        "message": "Test",
+    }, follow_redirects=True)
+    assert b"E-Mail-Adresse angeben" in resp.data
+
+
+def test_booking_rejects_past_date(client):
+    resp = client.post("/booking/request", data={
+        "name": "Club Booker", "email": "booker@example.com",
         "event_date": (date.today() - timedelta(days=5)).isoformat(),
         "location": "Test Club",
         "message": "Test",
@@ -116,8 +115,8 @@ def test_booking_rejects_past_date(client):
 
 def test_admin_can_accept_booking_and_gig_is_created(client, app):
     register(client)  # wird automatisch admin
-    login(client)
     client.post("/booking/request", data={
+        "name": "Club Booker", "email": "booker@example.com",
         "event_date": (date.today() + timedelta(days=20)).isoformat(),
         "location": "Konflikt-Club",
         "message": "x",
@@ -127,6 +126,7 @@ def test_admin_can_accept_booking_and_gig_is_created(client, app):
         booking = BookingRequest.query.first()
         booking_id = booking.id
 
+    login(client)
     resp = client.post(f"/admin/bookings/{booking_id}/accept", follow_redirects=True)
     assert b"angenommen" in resp.data
     with app.app_context():
@@ -135,7 +135,6 @@ def test_admin_can_accept_booking_and_gig_is_created(client, app):
 
 def test_booking_conflict_detection(client, app):
     register(client)  # admin
-    login(client)
     event_date = (date.today() + timedelta(days=30)).isoformat()
 
     with app.app_context():
@@ -143,13 +142,26 @@ def test_booking_conflict_detection(client, app):
                             status="upcoming"))
         db.session.commit()
 
-    client.post("/booking/request", data={"event_date": event_date, "location": "New Club", "message": "x"})
+    client.post("/booking/request", data={
+        "name": "Club Booker", "email": "booker@example.com",
+        "event_date": event_date, "location": "New Club", "message": "x",
+    })
     with app.app_context():
         from app.models import BookingRequest
         booking_id = BookingRequest.query.first().id
 
+    login(client)
     resp = client.post(f"/admin/bookings/{booking_id}/accept", follow_redirects=True)
     assert b"Konflikt" in resp.data
+
+
+def test_gated_press_item_hidden_link_for_anonymous(client, app):
+    with app.app_context():
+        db.session.add(PressItem(type="link", title="Full EPK", file_url="https://example.com/epk", gated=True))
+        db.session.commit()
+    resp = client.get("/")
+    assert b"Login zum Freischalten" in resp.data
+    assert b"https://example.com/epk" not in resp.data
 
 
 def test_non_admin_cannot_access_dashboard(client):

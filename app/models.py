@@ -96,23 +96,39 @@ class SetItem(db.Model):
 
 
 class PressItem(db.Model):
-    """Presskit-Datei oder -Link (PDF, ZIP, externer Ordner)."""
+    """
+    Presskit-Datei oder -Link (PDF, ZIP, externer Ordner).
+    gated=True bedeutet: der Link/Download ist nur fuer eingeloggte User
+    sichtbar (z.B. das vollstaendige EPK mit Demo-Tracks) - Besucher ohne
+    Login sehen stattdessen eine Aufforderung, sich zu registrieren.
+    """
     __tablename__ = "press_items"
 
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.String(20), nullable=False)   # "pdf" | "zip" | "link"
     title = db.Column(db.String(150), nullable=False)
     file_url = db.Column(db.String(300), nullable=False)
+    gated = db.Column(db.Boolean, nullable=False, default=False)
 
     def to_dict(self):
-        return {"id": self.id, "type": self.type, "title": self.title, "file_url": self.file_url}
+        return {
+            "id": self.id, "type": self.type, "title": self.title,
+            "file_url": self.file_url, "gated": self.gated,
+        }
 
 
 class BookingRequest(db.Model):
     """
     Buchungsanfrage eines Veranstalters/Bookers.
-    Das ist die zentrale Geschaeftslogik der Applikation:
-    - Ein eingeloggter User stellt eine Anfrage fuer ein Datum/Ort.
+    Das Formular ist bewusst OEFFENTLICH (kein Login noetig) - aus
+    Booking-/Marketing-Sicht soll die Huerde fuer Anfragen so tief wie
+    moeglich sein. Ist der Absender eingeloggt, wird requester_id gesetzt
+    und die Anfrage erscheint spaeter in seinem Account; ist er es nicht,
+    bleibt requester_id leer und Name/E-Mail kommen direkt aus dem Formular.
+    Das zentrale Login/Registrierungs-Erlebnis der App liegt stattdessen
+    auf dem exklusiven Presskit-Inhalt (siehe PressItem.gated).
+
+    Geschaeftslogik:
     - Der Admin sieht alle Anfragen und kann sie annehmen oder ablehnen.
     - Beim Annehmen wird geprueft, ob am selben Datum bereits ein
       bestaetigter Gig existiert (Konfliktpruefung) - siehe
@@ -122,7 +138,7 @@ class BookingRequest(db.Model):
     __tablename__ = "booking_requests"
 
     id = db.Column(db.Integer, primary_key=True)
-    requester_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    requester_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
     requester_name = db.Column(db.String(150), nullable=False)
     requester_email = db.Column(db.String(120), nullable=False)
     event_date = db.Column(db.Date, nullable=False)

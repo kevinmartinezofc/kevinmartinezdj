@@ -113,5 +113,44 @@
     </table>
   </div>
 
+  <div class="admin-section">
+    <h2>Presskit verwalten</h2>
+    <form class="inline-form" method="POST" action="{{ url_for('booking.add_press_item') }}">
+      <div class="field"><label>Titel</label><input type="text" name="title" required></div>
+      <div class="field">
+        <label>Typ</label>
+        <select name="type">
+          <option value="link">Link</option>
+          <option value="pdf">PDF</option>
+          <option value="zip">ZIP</option>
+        </select>
+      </div>
+      <div class="field"><label>URL</label><input type="text" name="file_url" required></div>
+      <div class="field">
+        <label style="display:flex; align-items:center; gap:8px; margin-top:20px;">
+          <input type="checkbox" name="gated" style="width:auto;"> Nur fuer eingeloggte User
+        </label>
+      </div>
+      <button class="submit-btn" type="submit">Hinzufuegen</button>
+    </form>
+    <table class="admin-table">
+      <thead><tr><th>Titel</th><th>Typ</th><th>Gesperrt?</th><th></th></tr></thead>
+      <tbody>
+        {% for p in press_items %}
+        <tr>
+          <td>{{ p.title }}</td>
+          <td>{{ p.type }}</td>
+          <td>{{ 'Ja (Login noetig)' if p.gated else 'Nein (oeffentlich)' }}</td>
+          <td>
+            <form style="margin:0;" method="POST" action="{{ url_for('booking.delete_press_item', item_id=p.id) }}">
+              <button class="btn-small decline" type="submit">Loeschen</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
 </section>
 {% endblock %}

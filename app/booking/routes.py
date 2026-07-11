@@ -5,7 +5,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_required, current_user
 
 from app.extensions import db
-from app.models import BookingRequest, Gig, SetItem, PressItem
+from app.models import BookingRequest, Gig, SetItem, PressItem  # noqa: F401 (PressItem used below)
 
 booking_bp = Blueprint("booking", __name__)
 
@@ -21,15 +21,23 @@ def admin_required(view_func):
 
 
 # ---------------------------------------------------------------------------
-# Oeffentlicher Teil: Booking-Anfrage stellen (Login erforderlich)
+# Oeffentlicher Teil: Booking-Anfrage stellen (KEIN Login noetig)
+# Bewusste Entscheidung aus Marketing-/Booking-Sicht: die Huerde fuer eine
+# Anfrage soll so tief wie moeglich sein. Ist der Absender eingeloggt,
+# wird die Anfrage zusaetzlich seinem Account zugeordnet.
 # ---------------------------------------------------------------------------
 
 @booking_bp.route("/booking/request", methods=["POST"])
-@login_required
 def create_booking():
+    name = request.form.get("name", "").strip()
+    email = request.form.get("email", "").strip()
     event_date_str = request.form.get("event_date", "")
     location = request.form.get("location", "").strip()
     message = request.form.get("message", "").strip()
+
+    if not name or not email or "@" not in email:
+        flash("Bitte Name und eine gueltige E-Mail-Adresse angeben.", "error")
+        return redirect(url_for("main.index") + "#booking")
 
     try:
         event_date = datetime.strptime(event_date_str, "%Y-%m-%d").date()
@@ -42,9 +50,9 @@ def create_booking():
         return redirect(url_for("main.index") + "#booking")
 
     booking = BookingRequest(
-        requester_id=current_user.id,
-        requester_name=current_user.username,
-        requester_email=current_user.email,
+        requester_id=current_user.id if current_user.is_authenticated else None,
+        requester_name=name,
+        requester_email=email,
         event_date=event_date,
         location=location,
         message=message,
@@ -194,4 +202,31 @@ def delete_set(set_id):
     db.session.delete(s)
     db.session.commit()
     flash("Set geloescht.", "info")
+    return redirect(url_for("booking.dashboard"))
+
+
+@booking_bp.route("/admin/press/add", methods=["POST"])
+@login_required
+@admin_required
+def add_press_item():
+    item = PressItem(
+        title=request.form.get("title", "").strip(),
+        type=request.form.get("type", "link"),
+        file_url=request.form.get("file_url", "").strip(),
+        gated=bool(request.form.get("gated")),
+    )
+    db.session.add(item)
+    db.session.commit()
+    flash("Presskit-Eintrag hinzugefuegt.", "success")
+    return redirect(url_for("booking.dashboard"))
+
+
+@booking_bp.route("/admin/press/<int:item_id>/delete", methods=["POST"])
+@login_required
+@admin_required
+def delete_press_item(item_id):
+    item = PressItem.query.get_or_404(item_id)
+    db.session.delete(item)
+    db.session.commit()
+    flash("Presskit-Eintrag geloescht.", "info")
     return redirect(url_for("booking.dashboard"))

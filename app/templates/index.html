@@ -98,8 +98,19 @@
       <h2>Request Booking</h2>
     </div>
 
-    {% if current_user.is_authenticated %}
     <form class="reveal" action="{{ url_for('booking.create_booking') }}" method="POST">
+      <div class="row2">
+        <div class="field">
+          <label>Name</label>
+          <input type="text" name="name" placeholder="Dein Name / Veranstalter"
+                 value="{{ current_user.username if current_user.is_authenticated else '' }}" required>
+        </div>
+        <div class="field">
+          <label>E-Mail</label>
+          <input type="email" name="email"
+                 value="{{ current_user.email if current_user.is_authenticated else '' }}" required>
+        </div>
+      </div>
       <div class="row2">
         <div class="field">
           <label>Event-Date</label>
@@ -115,15 +126,8 @@
         <textarea name="message" placeholder="Details zum Event, Set-Laenge, Publikum..."></textarea>
       </div>
       <button class="submit-btn" type="submit">Send Request</button>
-      <p class="form-note">Angemeldet als {{ current_user.username }} ({{ current_user.email }})</p>
+      <p class="form-note">Kein Konto noetig — wir melden uns per E-Mail zurueck.</p>
     </form>
-    {% else %}
-    <p class="form-note" style="font-size:14px;">
-      Bitte <a href="{{ url_for('auth.login') }}" style="color:var(--accent);">einloggen</a>
-      oder <a href="{{ url_for('auth.register') }}" style="color:var(--accent);">registrieren</a>,
-      um eine Booking-Anfrage zu senden.
-    </p>
-    {% endif %}
   </div>
 </section>
 
@@ -134,15 +138,31 @@
   </div>
   <div class="press-grid reveal">
     {% for p in press_items %}
-    <a class="press-item" href="{{ p.file_url }}" target="_blank" rel="noopener">
-      <span class="mono">{{ p.type | upper }}</span>
-      <h3>{{ p.title }}</h3>
-      <span class="dl">{{ 'Open' if p.type == 'link' else 'Download' }}</span>
-    </a>
+      {% if p.gated and not current_user.is_authenticated %}
+      <a class="press-item" href="{{ url_for('auth.register') }}">
+        <span class="mono">{{ p.type | upper }} · LOCKED</span>
+        <h3>{{ p.title }}</h3>
+        <span class="dl">Login zum Freischalten</span>
+      </a>
+      {% else %}
+      <a class="press-item" href="{{ p.file_url }}" target="_blank" rel="noopener">
+        <span class="mono">{{ p.type | upper }}</span>
+        <h3>{{ p.title }}</h3>
+        <span class="dl">{{ 'Open' if p.type == 'link' else 'Download' }}</span>
+      </a>
+      {% endif %}
     {% else %}
     <p class="mono" style="color:var(--text-dim); padding:20px;">Noch keine Presskit-Dateien hinterlegt.</p>
     {% endfor %}
   </div>
+  {% set has_gated = press_items | selectattr('gated') | list %}
+  {% if has_gated and not current_user.is_authenticated %}
+  <p class="form-note" style="margin-top:20px; font-size:14px;">
+    Exklusive Inhalte (Demo-Tracks, volles EPK) siehst du nach
+    <a href="{{ url_for('auth.register') }}" style="color:var(--accent);">Registrierung</a>
+    oder <a href="{{ url_for('auth.login') }}" style="color:var(--accent);">Login</a>.
+  </p>
+  {% endif %}
 </section>
 
 {% endblock %}
